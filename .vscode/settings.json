@@ -141,5 +141,6 @@
     "mutex": "cpp",
     "thread": "cpp",
     "*.tcc": "cpp"
-  }
+  },
+  "cmake.ignoreCMakeListsMissing": true
 }

@@ -27,6 +27,7 @@ int main() {
 
    // Demande à l'utilisateur de choisir la longueur du mot de passe
    cout << "Veuillez entrer la longueur du mot de passe souhaite!" << endl;
+
    cin >> length; // Lecture de la longueur entrée par l'utilisateur
    // Affichage de la longueur choisie par l'utilisateur
    cout << "Vous avez choisi une longueur de " << length << " caracteres" << endl;
