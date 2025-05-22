@@ -1,1 +1,1 @@
-   string mot_de_passe = "";
+int main()
