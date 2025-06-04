@@ -140,7 +140,8 @@
     "iomanip": "cpp",
     "mutex": "cpp",
     "thread": "cpp",
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "codecvt": "cpp"
   },
   "cmake.ignoreCMakeListsMissing": true
 }
