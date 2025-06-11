@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Combat Arena</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+        }
+
+        .setup-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #ff6b35;
+        }
+
+        .ninja-setup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .ninja-form {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .ninja-form h3 {
+            color: #ff6b35;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffdc00;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid #444;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .stats-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .battle-arena {
+            display: none;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #ff6b35;
+        }
+
+        .fighters {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .fighter {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #444;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        .fighter.active {
+            border-color: #ffdc00;
+            box-shadow: 0 0 20px rgba(255, 220, 0, 0.3);
+        }
+
+        .fighter h3 {
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+
+        .health-bar, .chakra-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid #555;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            transition: width 0.5s ease;
+        }
+
+        .chakra-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0066ff, #66ccff);
+            transition: width 0.5s ease;
+        }
+
+        .vs {
+            font-size: 3rem;
+            color: #ff6b35;
+            text-shadow: 0 0 20px #ff6b35;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            background: linear-gradient(45deg, #444, #666);
+            border: 2px solid #888;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(45deg, #666, #888);
+            border-color: #ff6b35;
+            transform: translateY(-2px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .action-cost {
+            display: block;
+            font-size: 0.8rem;
+            color: #ffdc00;
+            margin-top: 5px;
+        }
+
+        .combat-log {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 20px;
+            height: 250px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+            border-left: 3px solid #444;
+        }
+
+        .log-attack { border-left-color: #ff6b35; }
+        .log-special { border-left-color: #66ccff; }
+        .log-heal { border-left-color: #00ff00; }
+        .log-critical { border-left-color: #ffff00; background: rgba(255, 255, 0, 0.1); }
+
+        .game-over {
+            display: none;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #ff6b35;
+        }
+
+        .winner-text {
+            font-size: 2.5rem;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            margin-bottom: 20px;
+        }
+
+        @keyframes damage {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .damage-animation {
+            animation: damage 0.5s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .ninja-setup, .fighters {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥷 NINJA COMBAT ARENA 🥷</h1>
+        
+        <div class="setup-panel" id="setup">
+            <div class="ninja-setup">
+                <div class="ninja-form">
+                    <h3>🥷 Ninja 1</h3>
+                    
+                    <div class="form-group">
+                        <label>Nom:</label>
+                        <input type="text" id="name1" value="Naruto" placeholder="Nom du ninja">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Clan:</label>
+                        <select id="clan1" onchange="updateStats(1)">
+                            <option value="Uzumaki">🌀 Uzumaki (Tank)</option>
+                            <option value="Uchiha">👁️ Uchiha (Attaquant)</option>
+                            <option value="Hyuga">🎯 Hyuga (Précision)</option>
+                            <option value="Senju">🌳 Senju (Équilibré)</option>
+                            <option value="Hatake">⚡ Hatake (Vitesse)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Technique spéciale:</label>
+                        <select id="technique1">
+                            <option value="Rasengan">🌀 Rasengan</option>
+                            <option value="Kage Bunshin">👥 Clones</option>
+                            <option value="Sage Mode">🧘 Mode Ermite</option>
+                        </select>
+                    </div>
+
+                    <div class="stats-display">
+                        <div class="stat-item">Vie: <span id="hp1-display">120</span></div>
+                        <div class="stat-item">Chakra: <span id="chakra1-display">80</span></div>
+                        <div class="stat-item">Attaque: <span id="attack1-display">15</span></div>
+                        <div class="stat-item">Défense: <span id="defense1-display">12</span></div>
+                    </div>
+                </div>
+
+                <div class="ninja-form">
+                    <h3>🥷 Ninja 2</h3>
+                    
+                    <div class="form-group">
+                        <label>Nom:</label>
+                        <input type="text" id="name2" value="Sasuke" placeholder="Nom du ninja">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Clan:</label>
+                        <select id="clan2" onchange="updateStats(2)">
+                            <option value="Uchiha">👁️ Uchiha (Attaquant)</option>
+                            <option value="Uzumaki">🌀 Uzumaki (Tank)</option>
+                            <option value="Hyuga">🎯 Hyuga (Précision)</option>
+                            <option value="Senju">🌳 Senju (Équilibré)</option>
+                            <option value="Hatake">⚡ Hatake (Vitesse)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Technique spéciale:</label>
+                        <select id="technique2">
+                            <option value="Chidori">⚡ Chidori</option>
+                            <option value="Amaterasu">🔥 Amaterasu</option>
+                            <option value="Susanoo">🛡️ Susanoo</option>
+                        </select>
+                    </div>
+
+                    <div class="stats-display">
+                        <div class="stat-item">Vie: <span id="hp2-display">90</span></div>
+                        <div class="stat-item">Chakra: <span id="chakra2-display">70</span></div>
+                        <div class="stat-item">Attaque: <span id="attack2-display">22</span></div>
+                        <div class="stat-item">Défense: <span id="defense2-display">8</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startBattle()">🔥 COMMENCER LE COMBAT ! 🔥</button>
+        </div>
+
+        <div class="battle-arena" id="arena">
+            <div class="fighters">
+                <div class="fighter" id="fighter1">
+                    <h3 id="fighter1Name">Ninja 1</h3>
+                    <div><strong>Clan:</strong> <span id="fighter1Clan"></span></div>
+                    <div><strong>Technique:</strong> <span id="fighter1Tech"></span></div>
+                    
+                    <div class="health-bar">
+                        <div class="health-fill" id="health1" style="width: 100%"></div>
+                    </div>
+                    <div>❤️ Vie: <span id="hp1">100</span>/<span id="maxHp1">100</span></div>
+                    
+                    <div class="chakra-bar">
+                        <div class="chakra-fill" id="chakra1" style="width: 100%"></div>
+                    </div>
+                    <div>💙 Chakra: <span id="chakra1Val">50</span>/<span id="maxChakra1">50</span></div>
+                </div>
+
+                <div class="vs">⚔️</div>
+
+                <div class="fighter" id="fighter2">
+                    <h3 id="fighter2Name">Ninja 2</h3>
+                    <div><strong>Clan:</strong> <span id="fighter2Clan"></span></div>
+                    <div><strong>Technique:</strong> <span id="fighter2Tech"></span></div>
+                    
+                    <div class="health-bar">
+                        <div class="health-fill" id="health2" style="width: 100%"></div>
+                    </div>
+                    <div>❤️ Vie: <span id="hp2">100</span>/<span id="maxHp2">100</span></div>
+                    
+                    <div class="chakra-bar">
+                        <div class="chakra-fill" id="chakra2" style="width: 100%"></div>
+                    </div>
+                    <div>💙 Chakra: <span id="chakra2Val">50</span>/<span id="maxChakra2">50</span></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn" onclick="basicAttack()">
+                    ⚔️ Attaque Basique
+                    <span class="action-cost">Gratuit</span>
+                </button>
+                <button class="action-btn" onclick="specialAttack()">
+                    🔥 Technique Spéciale
+                    <span class="action-cost">25 chakra</span>
+                </button>
+                <button class="action-btn" onclick="heal()">
+                    💚 Soin
+                    <span class="action-cost">20 chakra</span>
+                </button>
+                <button class="action-btn" onclick="defend()">
+                    🛡️ Défense
+                    <span class="action-cost">+10 chakra</span>
+                </button>
+                <button class="action-btn" onclick="charge()">
+                    ⚡ Charge Chakra
+                    <span class="action-cost">+30 chakra</span>
+                </button>
+                <button class="action-btn" onclick="ultimate()">
+                    🌟 Ultime
+                    <span class="action-cost">50 chakra</span>
+                </button>
+            </div>
+
+            <div class="combat-log" id="log">
+                <div class="log-entry">🥷 Le combat commence ! Que le meilleur ninja gagne ! 🥷</div>
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <div class="winner-text" id="winnerText"></div>
+            <button class="start-btn" onclick="restartGame()">🔄 Nouveau Combat</button>
+        </div>
+    </div>
+
+    <script>
+        class Ninja {
+            constructor(name, clan, technique) {
+                this.name = name;
+                this.clan = clan;
+                this.technique = technique;
+                
+                // Stats de base selon le clan
+                const clanStats = {
+                    'Uzumaki': { hp: 120, chakra: 80, attack: 15, defense: 12 },
+                    'Uchiha': { hp: 90, chakra: 70, attack: 22, defense: 8 },
+                    'Hyuga': { hp: 100, chakra: 60, attack: 18, defense: 15 },
+                    'Senju': { hp: 110, chakra: 65, attack: 17, defense: 14 },
+                    'Hatake': { hp: 95, chakra: 75, attack: 20, defense: 10 }
+                };
+
+                const stats = clanStats[clan] || clanStats['Senju'];
+                this.maxHp = stats.hp;
+                this.hp = stats.hp;
+                this.maxChakra = stats.chakra;
+                this.chakra = stats.chakra;
+                this.attack = stats.attack;
+                this.defense = stats.defense;
+                this.defending = false;
+            }
+
+            takeDamage(damage) {
+                const reduction = this.defending ? 0.5 : 1;
+                const actualDamage = Math.max(1, Math.floor((damage - this.defense) * reduction));
+                this.hp = Math.max(0, this.hp - actualDamage);
+                return actualDamage;
+            }
+
+            isAlive() {
+                return this.hp > 0;
+            }
+        }
+
+        let ninja1, ninja2, currentPlayer = 1;
+
+        const clanStats = {
+            'Uzumaki': { hp: 120, chakra: 80, attack: 15, defense: 12 },
+            'Uchiha': { hp: 90, chakra: 70, attack: 22, defense: 8 },
+            'Hyuga': { hp: 100, chakra: 60, attack: 18, defense: 15 },
+            'Senju': { hp: 110, chakra: 65, attack: 17, defense: 14 },
+            'Hatake': { hp: 95, chakra: 75, attack: 20, defense: 10 }
+        };
+
+        function updateStats(player) {
+            const clan = document.getElementById(`clan${player}`).value;
+            const stats = clanStats[clan];
+            
+            document.getElementById(`hp${player}-display`).textContent = stats.hp;
+            document.getElementById(`chakra${player}-display`).textContent = stats.chakra;
+            document.getElementById(`attack${player}-display`).textContent = stats.attack;
+            document.getElementById(`defense${player}-display`).textContent = stats.defense;
+        }
+
+        function startBattle() {
+            const name1 = document.getElementById('name1').value || 'Ninja 1';
+            const clan1 = document.getElementById('clan1').value;
+            const tech1 = document.getElementById('technique1').value;
+
+            const name2 = document.getElementById('name2').value || 'Ninja 2';
+            const clan2 = document.getElementById('clan2').value;
+            const tech2 = document.getElementById('technique2').value;
+
+            ninja1 = new Ninja(name1, clan1, tech1);
+            ninja2 = new Ninja(name2, clan2, tech2);
+
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('arena').style.display = 'block';
+
+            updateUI();
+            setActivePlayer();
+
+            addLog(`${ninja1.name} (${ninja1.clan}) VS ${ninja2.name} (${ninja2.clan})`, 'log-special');
+            addLog('Le combat commence !', 'log-special');
+        }
+
+        function updateUI() {
+            // Ninja 1
+            document.getElementById('fighter1Name').textContent = ninja1.name;
+            document.getElementById('fighter1Clan').textContent = ninja1.clan;
+            document.getElementById('fighter1Tech').textContent = ninja1.technique;
+            document.getElementById('hp1').textContent = ninja1.hp;
+            document.getElementById('maxHp1').textContent = ninja1.maxHp;
+            document.getElementById('chakra1Val').textContent = ninja1.chakra;
+            document.getElementById('maxChakra1').textContent = ninja1.maxChakra;
+            document.getElementById('health1').style.width = (ninja1.hp / ninja1.maxHp * 100) + '%';
+            document.getElementById('chakra1').style.width = (ninja1.chakra / ninja1.maxChakra * 100) + '%';
+
+            // Ninja 2
+            document.getElementById('fighter2Name').textContent = ninja2.name;
+            document.getElementById('fighter2Clan').textContent = ninja2.clan;
+            document.getElementById('fighter2Tech').textContent = ninja2.technique;
+            document.getElementById('hp2').textContent = ninja2.hp;
+            document.getElementById('maxHp2').textContent = ninja2.maxHp;
+            document.getElementById('chakra2Val').textContent = ninja2.chakra;
+            document.getElementById('maxChakra2').textContent = ninja2.maxChakra;
+            document.getElementById('health2').style.width = (ninja2.hp / ninja2.maxHp * 100) + '%';
+            document.getElementById('chakra2').style.width = (ninja2.chakra / ninja2.maxChakra * 100) + '%';
+        }
+
+        function setActivePlayer() {
+            document.getElementById('fighter1').classList.toggle('active', currentPlayer === 1);
+            document.getElementById('fighter2').classList.toggle('active', currentPlayer === 2);
+            
+            const buttons = document.querySelectorAll('.action-btn');
+            const currentNinja = currentPlayer === 1 ? ninja1 : ninja2;
+            
+            // Activer/désactiver les boutons selon le chakra
+            buttons[1].disabled = currentNinja.chakra < 25; // Technique spéciale
+            buttons[2].disabled = currentNinja.chakra < 20; // Soin
+            buttons[5].disabled = currentNinja.chakra < 50; // Ultime
+        }
+
+        function basicAttack() {
+            const attacker = currentPlayer === 1 ? ninja1 : ninja2;
+            const target = currentPlayer === 1 ? ninja2 : ninja1;
+            
+            const damage = Math.floor(Math.random() * 15) + attacker.attack;
+            const actualDamage = target.takeDamage(damage);
+            
+            addLog(`${attacker.name} attaque ${target.name} et inflige ${actualDamage} dégâts !`, 'log-attack');
+            animateDamage(currentPlayer === 1 ? 'fighter2' : 'fighter1');
+            
+            endTurn();
+        }
+
+        function specialAttack() {
+            const attacker = currentPlayer === 1 ? ninja1 : ninja2;
+            const target = currentPlayer === 1 ? ninja2 : ninja1;
+            
+            if (attacker.chakra < 25) {
+                addLog(`${attacker.name} n'a pas assez de chakra !`, 'log-attack');
+                return;
+            }
+            
+            attacker.chakra -= 25;
+            const damage = Math.floor(Math.random() * 25) + attacker.attack + 10;
+            const actualDamage = target.takeDamage(damage);
+            
+            addLog(`${attacker.name} utilise ${attacker.technique} et inflige ${actualDamage} dégâts !`, 'log-special');
+            animateDamage(currentPlayer === 1 ? 'fighter2' : 'fighter1');
+            
+            endTurn();
+        }
+
+        function heal() {
+            const ninja = currentPlayer === 1 ? ninja1 : ninja2;
+            
+            if (ninja.chakra < 20) {
+                addLog(`${ninja.name} n'a pas assez de chakra pour se soigner !`, 'log-attack');
+                return;
+            }
+            
+            ninja.chakra -= 20;
+            const healAmount = Math.floor(Math.random() * 30) + 20;
+            ninja.hp = Math.min(ninja.maxHp, ninja.hp + healAmount);
+            
+            addLog(`${ninja.name} récupère ${healAmount} points de vie !`, 'log-heal');
+            endTurn();
+        }
+
+        function defend() {
+            const ninja = currentPlayer === 1 ? ninja1 : ninja2;
+            
+            ninja.defending = true;
+            ninja.chakra = Math.min(ninja.maxChakra, ninja.chakra + 10);
+            
+            addLog(`${ninja.name} se met en défense et récupère 10 chakra !`, 'log-special');
+            endTurn();
+        }
+
+        function charge() {
+            const ninja = currentPlayer === 1 ? ninja1 : ninja2;
+            
+            ninja.chakra = Math.min(ninja.maxChakra, ninja.chakra + 30);
+            
+            addLog(`${ninja.name} charge son chakra et récupère 30 points !`, 'log-special');
+            endTurn();
+        }
+
+        function ultimate() {
+            const attacker = currentPlayer === 1 ? ninja1 : ninja2;
+            const target = currentPlayer === 1 ? ninja2 : ninja1;
+            
+            if (attacker.chakra < 50) {
+                addLog(`${attacker.name} n'a pas assez de chakra pour l'ultime !`, 'log-attack');
+                return;
+            }
+            
+            attacker.chakra -= 50;
+            const damage = Math.floor(Math.random() * 40) + attacker.attack + 20;
+            const actualDamage = target.takeDamage(damage);
+            
+            addLog(`${attacker.name} déchaîne son ULTIME ! ${actualDamage} dégâts massifs !`, 'log-critical');
+            animateDamage(currentPlayer === 1 ? 'fighter2' : 'fighter1');
+            
+            endTurn();
+        }
+
+        function endTurn() {
+            // Réinitialiser la défense
+            ninja1.defending = false;
+            ninja2.defending = false;
+            
+            updateUI();
+            
+            if (!ninja1.isAlive() || !ninja2.isAlive()) {
+                gameOver();
+                return;
+            }
+            
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            
+            setTimeout(() => {
+                setActivePlayer();
+            }, 1000);
+        }
+
+        function gameOver() {
+            const winner = ninja1.isAlive() ? ninja1 : ninja2;
+            
+            document.getElementById('arena').style.display = 'none';
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('winnerText').textContent = `🏆 ${winner.name} (${winner.clan}) Gagne ! 🏆`;
+            
+            addLog(`${winner.name} remporte le combat !`, 'log-critical');
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('setup').style.display = 'block';
+            document.getElementById('log').innerHTML = '<div class="log-entry">🥷 Le combat commence ! Que le meilleur ninja gagne ! 🥷</div>';
+            currentPlayer = 1;
+        }
+
+        function addLog(message, className = '') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${className}`;
+            entry.textContent = message;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function animateDamage(fighterId) {
+            const fighter = document.getElementById(fighterId);
+            fighter.classList.add('damage-animation');
+            setTimeout(() => {
+                fighter.classList.remove('damage-animation');
+            }, 500);
+        }
+
+        // Initialiser les stats au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats(1);
+            updateStats(2);
+        });
+    </script>
+</body>
+</html>
